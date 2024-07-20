@@ -10,15 +10,18 @@ posts = {
         "title": "My dog with 2 balls in his mouth",
         "link": "https://imgur.com/gallery/im-18-624-points-from-glorious-so-heres-picture-of-dog-with-two-his-mouth-XgbZdeA",
         "username": "user98",
-        "comments": [
-            {
-                "id": 0,
-                "upvotes": 8,
-                "text": "Thanks for my first Reddit gold!",
-                "username": "user98",
-            }
-        ],
     }
+}
+
+comments = {
+    0 : {
+    "id": 0,
+    "post_id" : 0,
+    "upvotes": 8,
+    "text": "Thanks for my first Reddit gold!",
+    "username": "user98",
+}
+
 }
 
 comment_id_counter = 1
@@ -66,7 +69,7 @@ def create_post():
         "title": data["title"],
         "link": data["link"],
         "username": data["username"],
-        "comments": []
+       
     }
     
     # add new post to our dictionary (aka db)
@@ -157,14 +160,58 @@ def upvote_post(id):
  
 @app.route("/api/posts/<int:id>/comments/", methods=["GET"])
 def get_comments(id):
+    comments_list = []
+    for comment in comments.values():
+        if comment["post_id"] == id:
+
+            comment_data = {
+                "id" :  comment["id"],
+                "upvotes": comment["upvotes"],
+                "text": comment ["text"],
+                "username" : comment ["username"],
+
+            }
+
+            comments_list.append(comment_data)
+
+    return jsonify ({"comments": comments_list}), 200
     # Get the list of comments for a specific post  
-    pass
+   
 
 
 @app.route("/api/posts/<int:id>/comments/", methods=["POST"])
 def create_comment(id):
     # Post a comment for a specific post
-    pass
+
+    # Create a new post using the data provided
+    global comment_id_counter
+
+    # get data from request body
+    data = request.json
+
+    # check the fields in data (should have title)
+    field_list = ["text", "username"]
+
+    if not all(key in data for key in field_list):
+        return jsonify({"error": "Missing fields in request"}), 400
+    
+    
+    comment = {
+        "id": comment_id_counter,
+        "comment_id": id,
+        "text": data["text"],
+        "username": data["username"],
+    
+       
+    }
+    
+    
+    comments[comment_id_counter] = comment
+    comment_id_counter += 1
+
+
+    
+    return jsonify(comment), 201
 
 
 @app.route("/api/posts/<int:pid>/comments/<int:cid>/", methods=["POST"])
