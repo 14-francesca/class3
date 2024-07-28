@@ -47,6 +47,33 @@ def get_all_posts():
     return jsonify({"posts": posts_list}), 200
 
 
+
+app.route("/api/posts/", methods=["GET"])
+def get_all_posts_ordered():
+
+    ordering = request.args.get('ordering','dec')
+    parameter_list = ["dec", "inc"]
+    # Return list of all posts present
+    if not ordering or ordering not in ["dec", "inc"]:
+        return jsonify ({"error": "Invalid ordering parametr"}), 400
+
+    post_list = list(posts.values())
+    def sort_value_post(post):
+        return post["upvotes"]
+
+    if ordering == "dec":
+        post_list.sort(key=sort_value_post, reverse= True)
+    else:
+        post_list.sort(key=sort_value_post)
+
+    post_list.sort(key=sort_value_post)
+
+
+    return jsonify(post_list), 200
+
+
+
+
 @app.route("/api/posts/", methods=["POST"])
 def create_post():
     # Create a new post using the data provided
@@ -65,7 +92,7 @@ def create_post():
     # new post
     post = {
         "id": post_id_counter,
-        "upvotes": 1,
+        "upvotes": 8,
         "title": data["title"],
         "link": data["link"],
         "username": data["username"],
@@ -249,6 +276,10 @@ def edit_comment(pid, cid):
         }
 
     return jsonify (comment_data), 200
+
+
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
